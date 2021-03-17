@@ -32,7 +32,7 @@
 
       <el-table-column min-width="300px" label="Title">
         <template slot-scope="{ row }">
-          <router-link :to="'/product/edit/' + row._id" class="link-type">
+          <router-link :to="'/banner/edit/' + row._id" class="link-type">
             <span>{{ row.title }}</span>
           </router-link>
         </template>
@@ -40,23 +40,11 @@
 
       <el-table-column align="center" label="Actions" width="120">
         <template slot-scope="scope">
-          <router-link :to="'/product/edit/' + scope.row._id">
+          <router-link :to="'/banner/edit/' + scope.row._id">
             <el-button type="primary" size="small" icon="el-icon-edit">
               Edit
             </el-button>
           </router-link>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="Setting" width="120">
-        <template slot-scope="scope">
-          <el-button
-            @click="delProcuct(scope.row._id)"
-            type="danger"
-            size="small"
-            icon="el-icon-delete"
-          >
-            Delet
-          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -72,20 +60,20 @@
 </template>
 
 <script>
-import { fetchList, delData } from "@/api/product";
-import Pagination from "@/components/Pagination"; // Secondary package based on el-pagination
+import { fetchList } from '@/api/banner'
+import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
-  name: "ArticleList",
+  name: 'ArticleList',
   components: { Pagination },
   filters: {
     statusFilter(status) {
       const statusMap = {
-        published: "success",
-        draft: "info",
-        deleted: "danger"
-      };
-      return statusMap[status];
+        published: 'success',
+        draft: 'info',
+        deleted: 'danger'
+      }
+      return statusMap[status]
     }
   },
   data() {
@@ -97,44 +85,24 @@ export default {
         page: 1,
         limit: 20
       }
-    };
+    }
   },
   created() {
-    this.getList();
+    this.getList()
   },
   methods: {
     getList() {
-      this.listLoading = true;
+      this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.items;
-        this.total = response.data.total;
-        this.listLoading = false;
-      });
-    },
-    delProcuct(id) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
+        console.log(response)
+        this.list = response.data.items
+        this.total = response.data.total
+
+        this.listLoading = false
       })
-        .then(() => {
-          delData({ id: id }).then(res => {
-            this.$message({
-              type: "success",
-              message: "删除成功!"
-            });
-            this.getList();
-          });
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
-        });
     }
   }
-};
+}
 </script>
 
 <style scoped>

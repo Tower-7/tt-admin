@@ -69,12 +69,7 @@
 </template>
 
 <script>
-import {
-  fetchList,
-  fetchBanner,
-  createBanner,
-  updateBanner
-} from "@/api/banner";
+import { updateProject, fetchProject } from "@/api/project";
 import Tinymce from "@/components/Tinymce";
 import Upload from "@/components/Upload/SingleImage3";
 import MDinput from "@/components/MDinput";
@@ -190,7 +185,7 @@ export default {
   },
   methods: {
     fetchData(id) {
-      fetchBanner(id)
+      fetchProject(id)
         .then(response => {
           console.log(response);
           this.postForm = response.data;
@@ -219,8 +214,7 @@ export default {
     submitForm() {
       this.$refs.postForm.validate(valid => {
         if (valid) {
-          console.log("111111111", this.postForm);
-          createBanner(this.postForm).then(() => {
+          updateProject(this.postForm).then(() => {
             this.dialogFormVisible = false;
             this.$notify({
               title: "Success",

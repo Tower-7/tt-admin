@@ -1,20 +1,21 @@
 <template>
   <div class="upload-container">
-    <!-- <el-upload
+    <el-upload
       :data="dataObj"
       :multiple="false"
       :show-file-list="false"
+      :before-upload="beforeUpload"
       :on-success="handleImageSuccess"
       class="image-uploader"
       drag
-      action="https://httpbin.org/post"
+      :action="uploadQiniuUrl"
     >
       <i class="el-icon-upload" />
-      <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-    </el-upload> -->
+      <div class="el-upload__text"><em>点击上传</em></div>
+    </el-upload>
     <div class="image-preview image-app-preview">
       <div v-show="imageUrl.length > 1" class="image-preview-wrapper">
-        <img :src="imageUrl">
+        <img :src="imageUrl" />
         <div class="image-preview-action">
           <i class="el-icon-delete" @click="rmImage" />
         </div>
@@ -22,7 +23,7 @@
     </div>
     <div class="image-preview">
       <div v-show="imageUrl.length > 1" class="image-preview-wrapper">
-        <img :src="imageUrl">
+        <img :src="imageUrl" />
         <div class="image-preview-action">
           <i class="el-icon-delete" @click="rmImage" />
         </div>
@@ -32,57 +33,59 @@
 </template>
 
 <script>
-import { getToken } from '@/api/qiniu'
+import { qiniuUrl } from "@/config";
+import { getToken } from "@/api/qiniu";
 
 export default {
-  name: 'SingleImageUpload3',
+  name: "SingleImageUpload3",
   props: {
     value: {
       type: String,
-      default: ''
+      default: ""
     }
   },
   data() {
     return {
-      tempUrl: '',
-      dataObj: { token: '', key: '' }
-    }
+      tempUrl: "",
+      uploadQiniuUrl: "https://upload-na0.qiniup.com",
+      dataObj: { token: "", key: "" }
+    };
   },
   computed: {
     imageUrl() {
-      return this.value
+      return this.value;
     }
   },
+  created() {},
   methods: {
     rmImage() {
-      this.emitInput('')
+      this.emitInput("");
     },
     emitInput(val) {
-      this.$emit('input', val)
+      this.$emit("input", val);
     },
-    handleImageSuccess(file) {
-      this.emitInput(file.files.file)
+    handleImageSuccess(data) {
+      this.emitInput(`${qiniuUrl}/${data.key}`);
     },
     beforeUpload() {
-      const _self = this
       return new Promise((resolve, reject) => {
         getToken()
           .then(response => {
-            const key = response.data.qiniu_key
-            const token = response.data.qiniu_token
-            _self._data.dataObj.token = token
-            _self._data.dataObj.key = key
-            this.tempUrl = response.data.qiniu_url
-            resolve(true)
+            console.log(response);
+            const key = response.data.key;
+            const token = response.data.uploadToken;
+            this.dataObj.token = token;
+            this.dataObj.key = key;
+            resolve(true);
           })
           .catch(err => {
-            console.log(err)
-            reject(false)
-          })
-      })
+            console.log(err);
+            reject(false);
+          });
+      });
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -92,7 +95,7 @@ export default {
   position: relative;
   @include clearfix;
   .image-uploader {
-    width: 35%;
+    width: 10%;
     float: left;
   }
   .image-preview {

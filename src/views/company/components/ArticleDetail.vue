@@ -7,9 +7,6 @@
       class="form-container"
     >
       <sticky :z-index="10" :class-name="'sub-navbar ' + postForm.status">
-        <CommentDropdown v-model="postForm.comment_disabled" />
-        <PlatformDropdown v-model="postForm.platforms" />
-        <SourceUrlDropdown v-model="postForm.source_uri" />
         <el-button
           v-loading="loading"
           style="margin-left: 10px;"
@@ -25,21 +22,53 @@
 
       <div class="createPost-main-container">
         <el-row>
-          <el-col :span="6">
-            <el-form-item style="margin-bottom: 40px;" prop="image_uri">
+          <el-col :span="24">
+            <el-form-item
+              style="margin-bottom: 40px;margin-right:40px"
+              prop="title"
+            >
               <MDinput
-                v-model="postForm.image_uri"
-                :maxlength="200"
+                v-model="postForm.title"
+                :maxlength="100"
                 name="name"
                 required
               >
-                Image_uri
+                主标题
               </MDinput>
             </el-form-item>
           </el-col>
-          <el-col :span="18">
-            <el-form-item prop="image_uri" style="margin-bottom: 30px;">
-              <Upload v-model="postForm.image_uri" />
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item
+              style="margin-bottom: 40px;margin-right:40px"
+              prop="subtitle"
+            >
+              <MDinput
+                v-model="postForm.subtitle"
+                :maxlength="100"
+                name="name"
+                required
+              >
+                副标题
+              </MDinput>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item
+              style="margin-bottom: 40px;margin-right:40px"
+              prop="intro"
+            >
+              <MDinput
+                v-model="postForm.intro"
+                :maxlength="500"
+                name="name"
+                required
+              >
+                介绍
+              </MDinput>
             </el-form-item>
           </el-col>
         </el-row>
@@ -68,8 +97,33 @@
             </el-form-item>
           </el-col>
         </el-row>
-
         <el-row>
+          <el-col :span="18">
+            <el-form-item prop="image_uri" style="margin-bottom: 30px;">
+              <Upload v-model="postForm.image_uri" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="6">
+            <el-form-item style="margin-bottom: 40px;" prop="map_image_uri">
+              <MDinput
+                v-model="postForm.map_image_uri"
+                :maxlength="200"
+                name="name"
+                required
+              >
+                Map_image_uri
+              </MDinput>
+            </el-form-item>
+          </el-col>
+          <el-col :span="18">
+            <el-form-item prop="map_image_uri" style="margin-bottom: 30px;">
+              <Upload v-model="postForm.map_image_uri" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <!-- <el-row>
           <el-col :span="6">
             <el-form-item
               style="margin-bottom: 40px;margin-right:40px"
@@ -130,7 +184,7 @@
               </MDinput>
             </el-form-item>
           </el-col>
-        </el-row>
+        </el-row> -->
 
         <el-row>
           <el-col :span="6">
@@ -160,6 +214,21 @@
                 required
               >
                 联系邮箱
+              </MDinput>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item
+              style="margin-bottom: 40px;margin-right:40px"
+              prop="adress"
+            >
+              <MDinput
+                v-model="postForm.adress"
+                :maxlength="100"
+                name="name"
+                required
+              >
+                联系地址
               </MDinput>
             </el-form-item>
           </el-col>
@@ -323,12 +392,6 @@ export default {
             });
           });
           this.loading = true;
-          this.$notify({
-            title: "成功",
-            message: "发布文章成功",
-            type: "success",
-            duration: 2000
-          });
           this.postForm.status = "published";
           this.loading = false;
         } else {

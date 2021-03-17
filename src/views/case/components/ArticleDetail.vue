@@ -53,18 +53,6 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="6">
-            <el-form-item style="margin-bottom: 40px;" prop="image_uri">
-              <MDinput
-                v-model="postForm.image_uri"
-                :maxlength="100"
-                name="name"
-                required
-              >
-                Image_uri
-              </MDinput>
-            </el-form-item>
-          </el-col>
           <el-col :span="18"
             ><el-form-item prop="image_uri" style="margin-bottom: 30px;">
               <Upload v-model="postForm.image_uri" /> </el-form-item

@@ -6,20 +6,14 @@
       :rules="rules"
       class="form-container"
     >
-      <sticky :z-index="10" :class-name="'sub-navbar ' + postForm.status">
-        <CommentDropdown v-model="postForm.comment_disabled" />
-        <PlatformDropdown v-model="postForm.platforms" />
-        <SourceUrlDropdown v-model="postForm.source_uri" />
+      <sticky :z-index="10" class-name="sub-navbar">
         <el-button
           v-loading="loading"
           style="margin-left: 10px;"
           type="success"
           @click="submitForm"
         >
-          Publish
-        </el-button>
-        <el-button v-loading="loading" type="warning" @click="draftForm">
-          Draft
+          发布
         </el-button>
       </sticky>
 
@@ -40,41 +34,25 @@
         </el-row>
         <el-row>
           <el-col :span="24">
-            <el-form-item style="margin-bottom: 40px;" prop="intro">
+            <el-form-item style="margin-bottom: 40px;" prop="description">
               <MDinput
-                v-model="postForm.intro"
+                v-model="postForm.description"
                 :maxlength="100"
                 name="name"
                 required
               >
-                Intro
+                Description
               </MDinput>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="18">
-            <el-form-item prop="image_uri" style="margin-bottom: 30px;">
-              <Upload v-model="postForm.image_uri" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-form-item prop="content" style="margin-bottom: 30px;">
-          <Tinymce ref="editor" v-model="postForm.content" :height="400" />
-        </el-form-item>
       </div>
     </el-form>
   </div>
 </template>
 
 <script>
-import {
-  fetchList,
-  fetchBanner,
-  createBanner,
-  updateBanner
-} from "@/api/banner";
+import { fetchSeo, updateSeo } from "@/api/seo";
 import Tinymce from "@/components/Tinymce";
 import Upload from "@/components/Upload/SingleImage3";
 import MDinput from "@/components/MDinput";
@@ -89,7 +67,6 @@ import {
 } from "./Dropdown";
 
 const defaultForm = {
-  status: "draft",
   title: "", // 文章题目
   content: "", // 文章内容
   content_short: "", // 文章摘要
@@ -154,7 +131,7 @@ export default {
       rules: {
         // image_uri: [{ validator: validateRequire }],
         title: [{ validator: validateRequire }],
-        content: [{ validator: validateRequire }],
+        // content: [{ validator: validateRequire }],
         source_uri: [{ validator: validateSourceUri, trigger: "blur" }]
       },
       tempRoute: {}
@@ -179,7 +156,7 @@ export default {
   },
   created() {
     if (this.isEdit) {
-      const id = this.$route.params && this.$route.params.id;
+      const id = this.$route.path.charAt(this.$route.path.length - 1);
       this.fetchData(id);
     }
 
@@ -190,16 +167,15 @@ export default {
   },
   methods: {
     fetchData(id) {
-      fetchBanner(id)
+      fetchSeo(id)
         .then(response => {
-          console.log(response);
-          this.postForm = response.data;
-          this.postForm.id = id;
-          delete this.postForm.__v;
-          // set tagsview title
-          this.setTagsViewTitle();
-          // set page title
-          this.setPageTitle();
+          if (response.data !== null) {
+            this.postForm = response.data;
+            this.postForm.id = response.data._id;
+            delete this.postForm.__v;
+            this.setTagsViewTitle();
+            this.setPageTitle();
+          }
         })
         .catch(err => {
           console.log(err);
@@ -217,32 +193,30 @@ export default {
       document.title = `${title} - ${this.postForm.id}`;
     },
     submitForm() {
-      this.$refs.postForm.validate(valid => {
-        if (valid) {
-          console.log("111111111", this.postForm);
-          createBanner(this.postForm).then(() => {
-            this.dialogFormVisible = false;
-            this.$notify({
-              title: "Success",
-              message: "Created Successfully",
-              type: "success",
-              duration: 2000
-            });
+      this.$confirm("seo修改将可能影响网站排名，请慎重修改", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$refs.postForm.validate(valid => {
+            if (valid) {
+              updateSeo(this.postForm).then(() => {
+                this.dialogFormVisible = false;
+                this.$notify({
+                  title: "Success",
+                  message: "Created Successfully",
+                  type: "success",
+                  duration: 2000
+                });
+              });
+            } else {
+              console.log("error submit!!");
+              return false;
+            }
           });
-          this.loading = true;
-          this.$notify({
-            title: "成功",
-            message: "发布文章成功",
-            type: "success",
-            duration: 2000
-          });
-          this.postForm.status = "published";
-          this.loading = false;
-        } else {
-          console.log("error submit!!");
-          return false;
-        }
-      });
+        })
+        .catch(() => {});
     },
     draftForm() {
       if (
@@ -261,7 +235,6 @@ export default {
         showClose: true,
         duration: 1000
       });
-      this.postForm.status = "draft";
     },
     getRemoteUserList(query) {
       searchUser(query).then(response => {
